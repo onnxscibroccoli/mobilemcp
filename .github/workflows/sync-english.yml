@@ -1,0 +1,27 @@
+name: sync-english
+on:
+  schedule:
+    - cron: "45 11 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull the English brief from systems-intake
+        run: |
+          mkdir -p intake
+          curl -fsSL -o intake/ENGLISH.md "$MIRROR"
+          git config user.name "systems-intake"
+          git config user.email "304189395+onnxscibroccoli@users.noreply.github.com"
+          git add intake/ENGLISH.md
+          if git diff --staged --quiet; then
+            echo "no change"
+          else
+            git commit -m "Sync English brief from systems-intake"
+            git push
+          fi
+        env:
+          MIRROR: https://raw.githubusercontent.com/onnxscibroccoli/systems-intake/main/mirrors/Magi-Labs/mobilemcp/ENGLISH.md
